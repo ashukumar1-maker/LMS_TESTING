@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create Kit"
+  short_description: "Author reusable provisioning kits"
+  default_prompt: "Use $create-kit to create or update a kit branch with valid `KitDescription.md` and `KitInstallation.md` files."

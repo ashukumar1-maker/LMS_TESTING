@@ -1,0 +1,70 @@
+name: Database Tests
+
+on:
+  push:
+    branches: [ main, dev, staging ]
+    paths:
+      - 'backend/alembic/**'
+      - 'backend/src/models.py'
+      - '.github/workflows/database-tests.yml'
+  pull_request:
+    branches: [ main, dev, staging ]
+    paths:
+      - 'backend/alembic/**'
+      - 'backend/src/models.py'
+      - '.github/workflows/database-tests.yml'
+
+jobs:
+  database-tests:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.13'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      with:
+        version: "0.11.15"
+        enable-cache: true
+
+    - name: Install dependencies
+      run: |
+        uv sync --locked --group dev
+
+    - name: Run database migrations
+      run: |
+        uv run alembic upgrade head
+      env:
+        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db"
+
+    - name: Check for model changes without migrations
+      run: |
+        set -euo pipefail
+        # Alembic will return 1 if it detects unapplied model changes
+        uv run alembic check
+      env:
+        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db"

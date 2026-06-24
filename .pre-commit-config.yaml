@@ -1,0 +1,70 @@
+# Pre-commit hooks for code quality checks
+# Security and backend type-check hooks block commits; formatting hooks may auto-fix.
+fail_fast: false
+
+repos:
+  # Security: Gitleaks - blocks commits if secrets are detected
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.27.2
+    hooks:
+      - id: gitleaks
+
+  - repo: local
+    hooks:
+      # Backend hooks
+      - id: backend-ruff-check
+        name: Backend - Ruff Auto-fix Linting
+        entry: bash -c 'cd backend && uv run ruff check --fix && echo "✓ Ruff auto-fixed linting issues" || echo "⚠️  Ruff check found issues (not blocking commit)"'
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false
+        verbose: true
+
+      - id: backend-ruff-format
+        name: Backend - Ruff Auto-format
+        entry: bash -c 'cd backend && uv run ruff format && echo "✓ Ruff auto-formatted files" || echo "⚠️  Ruff format failed (not blocking commit)"'
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false
+        verbose: true
+
+      - id: backend-type-check
+        name: Backend - Type Checking
+        entry: bash -c 'cd backend && uv run basedpyright'
+        language: system
+        files: ^backend/(.*\.(py|pyi)|pyproject\.toml|uv\.lock)$
+        pass_filenames: false
+        verbose: true
+
+      - id: backend-generate-openapi
+        name: Backend - Generate OpenAPI JSON
+        entry: bash -c 'cd backend && uv run python generate_openapi.py && git add openapi.json || echo "⚠️  Failed to generate OpenAPI JSON (not blocking commit)"'
+        language: system
+        files: ^backend/(.*\.py|openapi\.json)$
+        pass_filenames: false
+        verbose: true
+
+      # Frontend hooks
+      - id: frontend-eslint
+        name: Frontend - ESLint
+        entry: bash -c 'cd frontend && yarn lint || echo "⚠️  ESLint found issues (not blocking commit)"'
+        language: system
+        files: ^frontend/.*\.(ts|tsx|js|jsx)$
+        pass_filenames: false
+        verbose: true
+
+      - id: frontend-prettier
+        name: Frontend - Prettier Format Check
+        entry: bash -c 'cd frontend && yarn format:check || echo "⚠️  Prettier format check found issues (not blocking commit)"'
+        language: system
+        files: ^frontend/.*\.(ts|tsx|js|jsx|css|json|md)$
+        pass_filenames: false
+        verbose: true
+
+      - id: frontend-typecheck
+        name: Frontend - TypeScript Type Check
+        entry: bash -c 'cd frontend && yarn typecheck || echo "⚠️  TypeScript type check found issues (not blocking commit)"'
+        language: system
+        files: ^frontend/.*\.(ts|tsx)$
+        pass_filenames: false
+        verbose: true

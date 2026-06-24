@@ -1,0 +1,9 @@
+{
+  "extends": "./backend/pyproject.toml",
+  "extraPaths": [
+    "backend"
+  ],
+  "stubPath": "backend/typings",
+  "venvPath": "backend",
+  "venv": ".venv"
+}

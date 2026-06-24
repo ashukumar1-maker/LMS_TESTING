@@ -1,0 +1,11 @@
+venv*
+*.DS_Store
+*.pem
+*__pycache__
+.aider*
+!.aider.conf.yml
+.venv
+.env
+.env_prod
+.pytest_cache
+key.json

@@ -1,0 +1,90 @@
+import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+type CardVariant = "section" | "surface"
+
+type CardProps = React.ComponentProps<"div"> & {
+	variant?: CardVariant
+}
+
+const cardVariants: Record<CardVariant, string> = {
+	section: "bg-transparent py-(--panel-padding) text-foreground shadow-none",
+	surface: "rounded-lg border bg-card py-(--panel-padding) text-card-foreground shadow-xs",
+}
+
+function Card({ className, variant = "surface", ...props }: CardProps) {
+	return (
+		<div
+			data-slot="card"
+			data-variant={variant}
+			className={cn("group/card flex flex-col gap-(--panel-gap)", cardVariants[variant], className)}
+			{...props}
+		/>
+	)
+}
+
+function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
+	return (
+		<div
+			data-slot="card-header"
+			className={cn(
+				"@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 has-data-[slot=card-action]:grid-cols-[1fr_auto] group-data-[variant=surface]/card:px-(--panel-padding) [.border-b]:pb-(--panel-padding)",
+				className
+			)}
+			{...props}
+		/>
+	)
+}
+
+function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+	return (
+		<div data-slot="card-title" className={cn("leading-none font-medium", className)} {...props} />
+	)
+}
+
+function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
+	return (
+		<div
+			data-slot="card-description"
+			className={cn("text-sm text-muted-foreground", className)}
+			{...props}
+		/>
+	)
+}
+
+function CardAction({ className, ...props }: React.ComponentProps<"div">) {
+	return (
+		<div
+			data-slot="card-action"
+			className={cn("col-start-2 row-span-2 row-start-1 self-start justify-self-end", className)}
+			{...props}
+		/>
+	)
+}
+
+function CardContent({ className, ...props }: React.ComponentProps<"div">) {
+	return (
+		<div
+			data-slot="card-content"
+			className={cn("group-data-[variant=surface]/card:px-(--panel-padding)", className)}
+			{...props}
+		/>
+	)
+}
+
+function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+	return (
+		<div
+			data-slot="card-footer"
+			className={cn(
+				"flex items-center group-data-[variant=surface]/card:px-(--panel-padding) [.border-t]:pt-(--panel-padding)",
+				className
+			)}
+			{...props}
+		/>
+	)
+}
+
+export { Card, CardHeader, CardFooter, CardTitle, CardAction, CardDescription, CardContent }
+export type { CardProps, CardVariant }

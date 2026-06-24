@@ -1,0 +1,125 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: fullstack_dev
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev_user -d fullstack_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Backend FastAPI Application
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command:
+      [
+        "sh",
+        "-c",
+        # The Dockerfile puts /opt/venv/bin on PATH, so call installed tools
+        # directly. `uv run` checks/syncs the project on startup, which slows
+        # hot-reload restarts and can rewrite the environment unexpectedly.
+        "alembic upgrade head && uvicorn src.server:app --host 0.0.0.0 --port 8000 --reload",
+      ]
+    ports:
+      - "${BACKEND_HOST_PORT:-8000}:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      # Core settings for Docker Compose
+      DATABASE_URL: postgresql://dev_user:dev_password@db:5432/fullstack_dev
+      CORS_ALLOWED_ORIGINS: "*"
+      ENVIRONMENT: ${ENVIRONMENT:-local}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Bind-mount only source code. The Python virtualenv lives at /opt/venv in
+      # the image so this mount does not hide dependencies or need a separate
+      # anonymous /app/.venv volume.
+      - ./backend:/app
+    healthcheck:
+      # Use Python from the venv instead of installing curl just for healthchecks.
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Frontend React Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${FRONTEND_HOST_PORT:-3000}:3000"
+    environment:
+      # Core settings with defaults
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:${BACKEND_HOST_PORT:-8000}}
+      - VITE_ENVIRONMENT=${VITE_ENVIRONMENT:-local}
+      # Pass through from host only if set (otherwise .env.development is used)
+      - VITE_IDENTITY_PLATFORM_API_KEY
+      - VITE_IDENTITY_PLATFORM_AUTH_DOMAIN
+      - VITE_IDENTITY_PLATFORM_PROJECT_ID
+      - VITE_IDENTITY_PLATFORM_STORAGE_BUCKET
+      - VITE_IDENTITY_PLATFORM_MESSAGING_SENDER_ID
+      - VITE_IDENTITY_PLATFORM_APP_ID
+      - VITE_AUTH_SERVICE_FRONTEND_URL
+      - VITE_PROJECT_ID
+      - VITE_POSTHOG_API_KEY
+      - VITE_POSTHOG_HOST
+      - VITE_SENTRY_DSN
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      # Keep Linux-built dependencies out of the host bind mount. Some packages
+      # include platform-specific binaries, and a container-local volume avoids
+      # macOS/Linux node_modules conflicts while preserving Vite hot reload.
+      - /app/node_modules
+    healthcheck:
+      # Use Node from the image instead of installing curl just for healthchecks.
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000', { signal: AbortSignal.timeout(2000) }).then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres_data:

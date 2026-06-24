@@ -1,0 +1,6 @@
+# Allow crawling so search engines can see the noindex meta tag
+# The meta tag in index.html tells crawlers not to index the content
+# This prevents the "indexed, though blocked by robots.txt" problem
+
+User-agent: *
+Allow: /

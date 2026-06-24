@@ -1,0 +1,51 @@
+name: Backend Code Quality
+
+on:
+  push:
+    branches: [ main, dev, staging ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-code-quality.yml'
+  pull_request:
+    branches: [ main, dev, staging ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-code-quality.yml'
+
+jobs:
+  backend-code-quality:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.13'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      with:
+        version: "0.11.15"
+        enable-cache: true
+
+    - name: Install dependencies
+      run: |
+        uv sync --locked --group dev
+
+    - name: Run linting
+      run: |
+        uv run ruff check
+
+    - name: Check formatting
+      run: |
+        uv run ruff format --check
+
+    - name: Run type checking
+      run: |
+        uv run basedpyright

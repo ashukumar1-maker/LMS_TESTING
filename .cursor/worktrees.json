@@ -1,0 +1,5 @@
+{
+    "setup-worktree": [
+      "bash local_setup.sh"
+    ]
+  }

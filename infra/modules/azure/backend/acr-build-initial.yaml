@@ -1,0 +1,13 @@
+version: v1.1.0
+steps:
+  - build: >-
+      --platform linux/amd64
+      --file Dockerfile
+      --tag $Registry/{{.Values.image_name}}:{{.Values.image_tag}}
+      --tag $Registry/{{.Values.image_name}}:latest
+      .
+    env:
+      - DOCKER_BUILDKIT=1
+  - push:
+      - $Registry/{{.Values.image_name}}:{{.Values.image_tag}}
+      - $Registry/{{.Values.image_name}}:latest

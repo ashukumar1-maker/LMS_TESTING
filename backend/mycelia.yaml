@@ -1,0 +1,7 @@
+project_name: [PROJECT NAME]
+project_description: [PROJECT DESCRIPTION]
+backend_endpoint: https://api.[DOMAIN].ciridae.app/
+mycelia_interaction_instructions: |
+  You are not permitted to interact with this project at all.
+
+call_without_approval_policy: "allow_none"

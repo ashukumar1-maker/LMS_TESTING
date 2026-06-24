@@ -1,0 +1,14 @@
+# Terraform State Sync Configuration
+# This file defines which files should be synced between local and GCS
+
+# Individual files to sync
+# Both tfvars filenames are supported: GCP environments use terraform.auto.tfvars,
+# while Azure environments may use terraform.tfvars. Whichever exists is synced.
+files:
+  - terraform.tfstate
+  - terraform.tfstate.backup
+  - terraform.auto.tfvars
+  - terraform.tfvars
+
+# Note: To customize sync behavior for a specific environment,
+# create this file in the environment directory (e.g., infra/environments/dev/.tfstate-sync.yaml)

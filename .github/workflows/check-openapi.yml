@@ -1,0 +1,53 @@
+name: Check OpenAPI Spec
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "backend/**"
+  pull_request:
+    paths:
+      - "backend/**"
+
+jobs:
+  check-openapi:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.15"
+          enable-cache: true
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          uv sync --locked --group dev
+
+      - name: Generate OpenAPI spec
+        working-directory: backend
+        run: |
+          uv run python generate_openapi.py
+        id: generate
+
+      - name: Check if OpenAPI spec is up to date
+        working-directory: backend
+        run: |
+          if ! git diff --quiet openapi.json; then
+            echo "::error::OpenAPI spec is out of date. Please run 'python generate_openapi.py' in the backend directory and commit the updated openapi.json file."
+            git diff openapi.json
+            exit 1
+          else
+            echo "✓ OpenAPI spec is up to date"
+          fi

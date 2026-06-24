@@ -1,0 +1,533 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FastAPI",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/example": {
+      "get": {
+        "summary": "Example Route Handler",
+        "description": "An example route that uses the verify_user dependency (formerly verify_token).\n\nIt receives the user_id from the dependency but returns a fixed message.\n\nReturns:\n    A simple example response payload.",
+        "operationId": "example_route_handler_example_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/feedback": {
+      "get": {
+        "tags": [
+          "feedback"
+        ],
+        "summary": "List Feedback Items",
+        "description": "List all feedback items sorted by column and priority.\n\nRequires authentication but all authenticated users can view all items.\n\nArgs:\n    db: The database session.\n\nReturns:\n    A list of all feedback items.",
+        "operationId": "list_feedback_items_feedback_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FeedbackItemResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Feedback Items Feedback Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "feedback"
+        ],
+        "summary": "Create Feedback Item",
+        "description": "Create a new feedback item.\n\nThe item is created in the Backlog column with the reporter_email\nautomatically set from the authenticated user.\n\nArgs:\n    item: The feedback item data.\n    current_user: The authenticated user.\n    db: The database session.\n\nReturns:\n    The created feedback item.",
+        "operationId": "create_feedback_item_feedback_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackItemCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackItemResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/feedback/{item_id}": {
+      "delete": {
+        "tags": [
+          "feedback"
+        ],
+        "summary": "Delete Feedback Item",
+        "description": "Delete a feedback item.\n\nPermission rules:\n- Customers can only delete their own items in the Backlog column\n- Ciridae users can delete any item\n\nFailure responses:\n    `404 Not Found`: The requested feedback item does not exist.\n    `403 Forbidden`: The caller is not allowed to delete the item, such as when the\n    item belongs to another user or is not in the Backlog column.\n\nArgs:\n    item_id: The ID of the item to delete.\n    current_user: The authenticated user.\n    db: The database session.\n\nRaises:\n    HTTPException: If the item is not found or the user lacks permission.",
+        "operationId": "delete_feedback_item_feedback__item_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "feedback"
+        ],
+        "summary": "Update Feedback Item",
+        "description": "Update an existing feedback item.\n\nPermission rules:\n- Customers can only update their own items in the Backlog column\n- Customers cannot change the column_id\n- Ciridae users can update any item including column changes\n\nFailure responses:\n    `404 Not Found`: The requested feedback item does not exist.\n    `403 Forbidden`: The caller is not allowed to update the item, move it between\n    columns, edit another user's item, or change status without Ciridae access.\n    `400 Bad Request`: The provided status is invalid for the target column.\n\nArgs:\n    item_id: The ID of the item to update.\n    update: The update data.\n    current_user: The authenticated user.\n    db: The database session.\n\nReturns:\n    The updated feedback item.\n\nRaises:\n    HTTPException: If the item is not found, invalid, or the user lacks permission.",
+        "operationId": "update_feedback_item_feedback__item_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackItemUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackItemResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Route Handler",
+        "description": "Return service health including database and bucket access.\n\nArgs:\n    response: FastAPI response object used to set unhealthy status codes.\n\nReturns:\n    A payload indicating the service health status.",
+        "operationId": "health_route_handler_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ExampleResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "ExampleResponse",
+        "description": "Response payload for the example route."
+      },
+      "FeedbackItemCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "appId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "FeedbackItemCreate",
+        "description": "Schema for creating a new feedback item."
+      },
+      "FeedbackItemResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "columnId": {
+            "type": "string",
+            "enum": [
+              "backlog",
+              "inProgress",
+              "done"
+            ],
+            "title": "Columnid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in_review",
+              "triaged",
+              "in_progress",
+              "done"
+            ],
+            "title": "Status"
+          },
+          "priorityIndex": {
+            "type": "number",
+            "title": "Priorityindex"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "reporterEmail": {
+            "type": "string",
+            "title": "Reporteremail"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updatedat"
+          },
+          "appId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "columnId",
+          "status",
+          "priorityIndex",
+          "title",
+          "description",
+          "reporterEmail",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "FeedbackItemResponse",
+        "description": "Schema for feedback item responses."
+      },
+      "FeedbackItemUpdate": {
+        "properties": {
+          "columnId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "backlog",
+                  "inProgress",
+                  "done"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Columnid"
+          },
+          "priorityIndex": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priorityindex"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "in_review",
+                  "triaged",
+                  "in_progress",
+                  "done"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "title": "FeedbackItemUpdate",
+        "description": "Schema for updating an existing feedback item."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthChecks": {
+        "properties": {
+          "database": {
+            "type": "boolean",
+            "title": "Database"
+          },
+          "bucket": {
+            "type": "boolean",
+            "title": "Bucket"
+          }
+        },
+        "type": "object",
+        "required": [
+          "database",
+          "bucket"
+        ],
+        "title": "HealthChecks",
+        "description": "Dependency checks included in the health response."
+      },
+      "HealthResponse": {
+        "properties": {
+          "healthy": {
+            "type": "boolean",
+            "title": "Healthy"
+          },
+          "checks": {
+            "$ref": "#/components/schemas/HealthChecks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "healthy",
+          "checks"
+        ],
+        "title": "HealthResponse",
+        "description": "Response payload for service health checks."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

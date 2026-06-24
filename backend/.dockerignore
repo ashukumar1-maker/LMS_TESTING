@@ -1,0 +1,32 @@
+# Bytecode caches
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+.venv/
+
+# Environment files
+.env
+.env.*
+
+# Local database files
+dev.db
+*.sqlite3
+
+# Pytest cache
+.pytest_cache/
+
+# Test directory
+tests/
+
+# Log files
+*.log
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+
+# Documentation
+README.md

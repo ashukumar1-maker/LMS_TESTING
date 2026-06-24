@@ -1,0 +1,16 @@
+from __future__ import annotations
+
+from types import TracebackType
+from typing import Self
+
+class PostgresContainer:
+    def __init__(self, image: str, *, driver: str | None = None) -> None: ...
+    def with_command(self, command: str) -> Self: ...
+    def __enter__(self) -> Self: ...
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None: ...
+    def get_connection_url(self) -> str: ...
