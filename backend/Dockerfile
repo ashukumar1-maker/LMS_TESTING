@@ -1,5 +1,5 @@
 # Use Astral UV base image with Python pre-installed
-FROM ghcr.io/astral-sh/uv:0.11.15-python3.13-trixie-slim
+FROM ghcr.io/astral-sh/uv:0.11.31-python3.13-trixie-slim
 
 # Keep the virtualenv outside /app so Compose can bind-mount source without
 # hiding or replacing container-built dependencies.
