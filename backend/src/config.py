@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     DB_POOL_SIZE: int = 2  # Number of connections to keep in the pool
     DB_MAX_OVERFLOW: int = 0  # Number of extra connections allowed above pool size
 
+    # AI API key for trait extraction (Anthropic Claude API)
+    AI_API_KEY: str = ""
+
+    # Google service account JSON for Gemini API
+    GOOGLE_SERVICE_ACCOUNT_JSON: str = ""
+
     # GCS bucket configuration
     # Optional name of the GCS bucket mounted to the backend service.
     MOUNTED_BACKEND_GCS_BUCKET_NAME: str | None = None

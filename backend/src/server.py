@@ -15,6 +15,7 @@ from src.config import settings
 from src.routes.example_route import router as example_router
 from src.routes.feedback import router as feedback_router
 from src.routes.health import router as health_router
+from src.routes.phase1 import router as phase1_router
 from src.sentry_scrub import scrub_sentry_auth_headers
 
 # Configure logger for this module
@@ -117,6 +118,7 @@ def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
 app.include_router(example_router)
 app.include_router(feedback_router)
 app.include_router(health_router)
+app.include_router(phase1_router)
 
 
 # --- Server Entrypoint --- #

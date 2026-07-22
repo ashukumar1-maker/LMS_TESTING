@@ -44,6 +44,7 @@ services:
       DATABASE_URL: postgresql://dev_user:dev_password@db:5432/fullstack_dev
       CORS_ALLOWED_ORIGINS: "*"
       ENVIRONMENT: ${ENVIRONMENT:-local}
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${GOOGLE_SERVICE_ACCOUNT_JSON:-}
     depends_on:
       db:
         condition: service_healthy

@@ -1,7 +1,7 @@
-import { BookOpenIcon } from "lucide-react"
+import { ClipboardListIcon, FileSpreadsheetIcon } from "lucide-react"
 import { Link } from "react-router-dom"
 
-import { GettingStartedPage } from "@/components/app/GettingStartedPage"
+import { HrDashboardPage } from "@/components/app/HrDashboardPage"
 import { SidebarAccountMenu } from "@/components/ui/sidebar-account-menu"
 import {
 	Sidebar,
@@ -30,7 +30,7 @@ function AppShell() {
 		<SidebarProvider className="bg-background" style={sidebarStyle}>
 			<AppSidebar />
 			<SidebarInset className="min-h-svh">
-				<GettingStartedPage />
+				<HrDashboardPage />
 			</SidebarInset>
 		</SidebarProvider>
 	)
@@ -112,11 +112,19 @@ function ExampleNavItem() {
 	return (
 		<SidebarMenu className="group-data-[collapsible=icon]:items-center">
 			<SidebarMenuItem>
-				<SidebarMenuButton asChild isActive tooltip="Getting Started">
+				<SidebarMenuButton asChild isActive tooltip="HR Dashboard">
 					<Link to="/app">
-						<BookOpenIcon />
-						<span>Getting Started</span>
+						<FileSpreadsheetIcon />
+						<span>HR Dashboard</span>
 					</Link>
+				</SidebarMenuButton>
+			</SidebarMenuItem>
+			<SidebarMenuItem>
+				<SidebarMenuButton asChild tooltip="TNA Form">
+					<a href="/tna" target="_blank" rel="noopener noreferrer">
+						<ClipboardListIcon />
+						<span>TNA Form</span>
+					</a>
 				</SidebarMenuButton>
 			</SidebarMenuItem>
 		</SidebarMenu>
